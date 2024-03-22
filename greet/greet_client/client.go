@@ -24,13 +24,74 @@ func main() {
 	fmt.Println("client created : ", c)
 
 	//-- unary
-	doUnary(c)
+	//doUnary(c)
 
 	//-- server streaming
-	doServerStreaming(c)
+	//doServerStreaming(c)
 
 	//-- client streaming
-	doClientStreaming(c)
+	//doClientStreaming(c)
+
+	//-- BiDi streaming
+	doBiDitStreaming(c)
+}
+
+func doBiDitStreaming(c greetpb.GreetServiceClient) {
+	fmt.Println("starting BiDi streaming")
+
+	//create stream
+	stream, err := c.GreetEveryOne(context.Background())
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	//
+	req := []*greetpb.GreetEveryOneRequest{
+		&greetpb.GreetEveryOneRequest{Greeting: &greetpb.Greeting{
+			FirstName: "abbas",
+		}},
+		&greetpb.GreetEveryOneRequest{Greeting: &greetpb.Greeting{
+			FirstName: "naser",
+		}},
+		&greetpb.GreetEveryOneRequest{Greeting: &greetpb.Greeting{
+			FirstName: "shahla",
+		}},
+		&greetpb.GreetEveryOneRequest{Greeting: &greetpb.Greeting{
+			FirstName: "mahla",
+		}},
+	}
+
+	//wait channel
+	waitch := make(chan struct{})
+	//send messages
+	go func() {
+		for _, r := range req {
+			fmt.Printf("sending messags %v \n", r)
+			stream.Send(r)
+			time.Sleep(1 * time.Second)
+		}
+		stream.CloseSend()
+	}()
+
+	//receive messages
+	go func() {
+
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatal(err)
+				break
+			}
+			fmt.Printf("received messages : %v", res.GetResult())
+		}
+		close(waitch)
+	}()
+
+	<-waitch
 }
 
 func doUnary(c greetpb.GreetServiceClient) {

@@ -34,6 +34,13 @@ message LongGreetResponse{
   string Result = 1;
 }
 
+//------ BiDi Streaming
+message GreetEveryOneRequest{
+  Greeting greeting = 1;
+}
+message GreetEveryOneResponse{
+  string Result = 1;
+}
 
 //------- Service
 service GreetService {
@@ -45,4 +52,7 @@ service GreetService {
 
   //client streaming
   rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse){}
+
+  //BiDi streaming
+  rpc GreetEveryOne(stream GreetEveryOneRequest) returns (stream GreetEveryOneResponse){}
 }
