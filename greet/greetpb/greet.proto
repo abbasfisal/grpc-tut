@@ -17,6 +17,21 @@ message GreetingResponse {
   string result = 1;
 }
 
+//------ Server Streaming
+message GreetManyTimesRequest{
+  Greeting greeting = 1;
+}
+message GreetManyTimesResponse{
+  string Result = 1;
+}
+
+
+
+//------- Service
 service GreetService {
+  //unary
   rpc Greet(GreetingRequest) returns (GreetingResponse) {};
+
+  //server streaming
+  rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse){}
 }
