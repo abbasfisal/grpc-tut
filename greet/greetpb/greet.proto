@@ -25,6 +25,14 @@ message GreetManyTimesResponse{
   string Result = 1;
 }
 
+//------ Client Streaming
+message LongGreetRequest{
+  Greeting greeting = 1 ;
+}
+
+message LongGreetResponse{
+  string Result = 1;
+}
 
 
 //------- Service
@@ -34,4 +42,7 @@ service GreetService {
 
   //server streaming
   rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse){}
+
+  //client streaming
+  rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse){}
 }
