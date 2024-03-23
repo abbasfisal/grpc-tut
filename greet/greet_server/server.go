@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/abbasfisal/grpc-tut/greet/greetpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"io"
 	"log"
 	"net"
@@ -98,6 +99,7 @@ func main() {
 	s := grpc.NewServer()
 
 	greetpb.RegisterGreetServiceServer(s, &server{})
+	reflection.Register(s)
 
 	fmt.Println("greet server is running :50051")
 
