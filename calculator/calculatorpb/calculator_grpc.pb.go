@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CalculatorClient interface {
 	Sum(ctx context.Context, in *SumRequest, opts ...grpc.CallOption) (*SumResponse, error)
+	SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error)
 }
 
 type calculatorClient struct {
@@ -42,11 +43,21 @@ func (c *calculatorClient) Sum(ctx context.Context, in *SumRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *calculatorClient) SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error) {
+	out := new(SquareRootResponse)
+	err := c.cc.Invoke(ctx, "/calculator.Calculator/SquareRoot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CalculatorServer is the server API for Calculator service.
 // All implementations must embed UnimplementedCalculatorServer
 // for forward compatibility
 type CalculatorServer interface {
 	Sum(context.Context, *SumRequest) (*SumResponse, error)
+	SquareRoot(context.Context, *SquareRootRequest) (*SquareRootResponse, error)
 	mustEmbedUnimplementedCalculatorServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedCalculatorServer struct {
 
 func (UnimplementedCalculatorServer) Sum(context.Context, *SumRequest) (*SumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sum not implemented")
+}
+func (UnimplementedCalculatorServer) SquareRoot(context.Context, *SquareRootRequest) (*SquareRootResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SquareRoot not implemented")
 }
 func (UnimplementedCalculatorServer) mustEmbedUnimplementedCalculatorServer() {}
 
@@ -88,6 +102,24 @@ func _Calculator_Sum_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Calculator_SquareRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SquareRootRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CalculatorServer).SquareRoot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/calculator.Calculator/SquareRoot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CalculatorServer).SquareRoot(ctx, req.(*SquareRootRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Calculator_ServiceDesc is the grpc.ServiceDesc for Calculator service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var Calculator_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Sum",
 			Handler:    _Calculator_Sum_Handler,
+		},
+		{
+			MethodName: "SquareRoot",
+			Handler:    _Calculator_SquareRoot_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
